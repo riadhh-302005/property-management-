@@ -269,7 +269,7 @@ const MaintenanceForm = () => {
                     {existingImages.map((img, i) => (
                       <img
                         key={i}
-                        src={`http://localhost:5000${img}`}
+                        src={`https://property-management-mg0p.onrender.com${img}`}
                         alt=""
                         className="w-28 h-28 object-cover rounded-lg border border-white/20"
                       />
