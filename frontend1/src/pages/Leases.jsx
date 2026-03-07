@@ -200,7 +200,7 @@ const Leases = () => {
                         transition
                       "
                       onClick={() =>
-                        window.open(`http://localhost:5000${lease.pdfUrl}`, '_blank')
+                        window.open(`https://property-management-mg0p.onrender.com${lease.pdfUrl}`, '_blank')
                       }
                     >
                       ⬇ Download PDF

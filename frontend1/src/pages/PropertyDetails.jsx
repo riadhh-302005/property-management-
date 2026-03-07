@@ -106,7 +106,7 @@ const PropertyDetails = () => {
                             shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-black/60">
               {property.images?.length ? (
                 <img
-                  src={`http://localhost:5000${property.images[0]}`}
+                  src={`https://property-management-mg0p.onrender.com${property.images[0]}`}
                   alt={property.name}
                   className="w-full h-[450px] object-cover"
                 />

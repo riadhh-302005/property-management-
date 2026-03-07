@@ -233,7 +233,7 @@ const MaintenanceDetails = () => {
                 {request.images.map((image, index) => (
                   <img
                     key={index}
-                    src={`http://localhost:5000${image}`}
+                    src={`https://property-management-mg0p.onrender.com${image}`}
                     alt={`Maintenance ${index + 1}`}
                     className="w-40 h-28 object-cover rounded-lg border border-white/10 shadow"
                   />

@@ -106,7 +106,7 @@ const Properties = () => {
                 <div className="relative h-52 bg-black/30">
                   {property.images?.length ? (
                     <img
-                      src={`http://localhost:5000${property.images[0]}`}
+                      src={`https://property-management-mg0p.onrender.com${property.images[0]}`}
                       alt={property.name}
                       className="w-full h-full object-cover"
                     />
