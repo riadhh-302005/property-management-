@@ -1,4 +1,4 @@
-Overview
+
 The Property Management System is a full-stack web application designed to simplify the process of managing properties, tenants, and listings. It provides an efficient platform for property owners/admins to handle property data and for users to explore available properties.
 
 🚀 Features
