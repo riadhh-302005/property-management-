@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const { initPaymentScheduler } = require('./services/paymentScheduler');
 
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const propertyRoutes = require('./routes/properties');
@@ -38,6 +39,8 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/leases', leaseRoutes);
 app.use('/api/messages', messageRoutes);
+app.use("/api/users", require("./routes/users"));
+
 
 // Health check route
 app.get('/api/health', (req, res) => {
