@@ -67,7 +67,7 @@ function AppRoutes() {
           <Route path="/leases/new" element={<ProtectedRoute><LeaseForm /></ProtectedRoute>} />
           <Route path="/leases/:id" element={<ProtectedRoute><LeaseDetails /></ProtectedRoute>} />
           <Route path="/leases/:id/edit" element={<ProtectedRoute><LeaseForm /></ProtectedRoute>} />
-
+          <Route path="/leases/new" element={<LeaseForm />} />
           {/* Payments */}
           <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
           <Route path="/payments/new" element={<ProtectedRoute><PaymentForm /></ProtectedRoute>} />

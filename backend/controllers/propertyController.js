@@ -7,8 +7,8 @@ const User = require('../models/User');
 exports.getProperties = async (req, res) => {
   try {
     let query = {};
-    
-    // Filter based on user role
+
+    // 🔥 ROLE BASED FILTER
     if (req.user.role === 'landlord') {
       query.landlord = req.user._id;
     } else if (req.user.role === 'tenant') {
@@ -16,35 +16,16 @@ exports.getProperties = async (req, res) => {
     } else if (req.user.role === 'manager') {
       query.assignedManager = req.user._id;
     }
-    
-    // Additional filters
-    if (req.query.status) {
-      query.status = req.query.status;
-    }
-    
-    if (req.query.type) {
-      query.type = req.query.type;
-    }
-    
-    if (req.query.search) {
-      query.$or = [
-        { name: { $regex: req.query.search, $options: 'i' } },
-        { 'address.city': { $regex: req.query.search, $options: 'i' } },
-        { 'address.state': { $regex: req.query.search, $options: 'i' } }
-      ];
-    }
-    
+
     const properties = await Property.find(query)
       .populate('landlord', 'name email phone')
       .populate('currentTenant', 'name email phone')
       .populate('assignedManager', 'name email phone')
       .sort({ createdAt: -1 });
-    
-    res.json({
-      success: true,
-      count: properties.length,
-      properties
-    });
+
+    // ✅ RETURN ARRAY DIRECTLY (IMPORTANT FIX)
+    res.json(properties);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

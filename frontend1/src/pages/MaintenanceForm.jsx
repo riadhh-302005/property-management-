@@ -56,18 +56,24 @@ const MaintenanceForm = () => {
     if (isEditMode) fetchMaintenanceRequest();
   }, [id]);
 
-  const fetchProperties = async () => {
-    try {
-      const response = await api.get("/properties");
-      const userProps = response.data.filter(
-        (prop) => prop.currentTenant?._id === user._id || prop.tenant?._id === user._id
-      );
-      setProperties(userProps);
-    } catch {
-      setError("Failed to load properties");
-    }
-  };
+ const fetchProperties = async () => {
+  try {
+    const response = await api.get("/properties");
 
+    console.log("Properties:", response.data);
+
+    // ✅ FIX: handle both array & object response
+    const data = Array.isArray(response.data)
+      ? response.data
+      : response.data.properties;
+
+    setProperties(data || []);
+
+  } catch (error) {
+    console.error(error);
+    setError("Failed to load properties");
+  }
+};
   const fetchMaintenanceRequest = async () => {
     try {
       const response = await api.get(`/maintenance/${id}`);
