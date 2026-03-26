@@ -147,7 +147,7 @@ const Login = () => {
             {/* TENANT */}
             <button
               onClick={() =>
-                handleTestLogin("akshatpratap@gmail.com", "123456")
+                handleTestLogin("akshatpratap@example.com", "123456")
               }
               className="w-full text-left bg-white/5 hover:bg-white/20 border border-white/10 
                          text-gray-200 px-4 py-3 rounded-lg transition"
@@ -159,7 +159,7 @@ const Login = () => {
                 <span className="text-xs text-gray-300">Use →</span>
               </div>
               <p className="text-xs text-gray-400">
-                akshatpratap@gmail.com
+                akshatpratap@example.com
               </p>
             </button>
           </div>
