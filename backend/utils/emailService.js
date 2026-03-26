@@ -7,7 +7,7 @@ const createTransporter = () => {
     return null;
   }
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({   // ✅ FIXED (no 'createTransporter')
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT || 587,
     secure: false, // true for 465, false for other ports

@@ -34,7 +34,8 @@ const Dashboard = () => {
           api.get("/maintenance"),
         ]);
 
-        const properties = propertiesRes.data.properties || [];
+        // ✅ FIXED HERE
+        const properties = propertiesRes.data || [];
         const payments = paymentsRes.data.payments || [];
         const maintenance = maintenanceRes.data.requests || [];
 
@@ -165,11 +166,21 @@ const Dashboard = () => {
           </h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <LuxuryActionCard
-              to="/properties/new"
-              Icon={PlusCircleIcon}
-              label="Add Property"
-            />
+
+            {/* ✅ ROLE BASED BUTTON */}
+            {isLandlord ? (
+              <LuxuryActionCard
+                to="/properties/new"
+                Icon={PlusCircleIcon}
+                label="Add Property"
+              />
+            ) : (
+              <LuxuryActionCard
+                to="/properties"
+                Icon={BuildingOfficeIcon}
+                label="View Properties"
+              />
+            )}
 
             <LuxuryActionCard
               to="/maintenance"

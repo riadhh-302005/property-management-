@@ -26,7 +26,7 @@ const Properties = () => {
   const fetchProperties = async () => {
     try {
       const response = await api.get("/properties");
-      setProperties(response.data.properties || []);
+      setProperties(response.data || []);
     } catch (err) {
       setError("Failed to load properties");
     } finally {
