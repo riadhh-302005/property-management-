@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
-import Card from "../components/common/Card";
-import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import Alert from "../components/common/Alert";
 import { formatCurrency } from "../utils/formatters";
@@ -17,13 +15,14 @@ const LeaseForm = () => {
   const [error, setError] = useState("");
   const [properties, setProperties] = useState([]);
   const [tenants, setTenants] = useState([]);
+
   const [formData, setFormData] = useState({
     propertyId: "",
     tenantId: "",
     startDate: "",
     endDate: "",
     rentAmount: "",
-    securityDeposit: "",
+    depositAmount: "", // ✅ FIXED
     paymentDueDay: 1,
     terms: "",
   });
@@ -32,66 +31,81 @@ const LeaseForm = () => {
     fetchProperties();
     fetchTenants();
     if (isEditMode) fetchLease();
-    // eslint-disable-next-line
   }, [id]);
 
-  const fetchLease = async () => {
-    try {
-      const response = await api.get(`/leases/${id}`);
-      const lease = response.data;
-      setFormData({
-        propertyId: lease.property._id || lease.property,
-        tenantId: lease.tenant._id || lease.tenant,
-        startDate: lease.startDate.split("T")[0],
-        endDate: lease.endDate.split("T")[0],
-        rentAmount: lease.rentAmount,
-        securityDeposit: lease.securityDeposit,
-        paymentDueDay: lease.paymentDueDay,
-        terms: lease.terms,
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch lease details");
-    } finally {
-      setInitialLoading(false);
-    }
-  };
-
+  // ✅ FETCH PROPERTIES FIXED
   const fetchProperties = async () => {
     try {
-      const response = await api.get("/properties");
-      const availableProps = (response.data.properties || []).filter(
+      const res = await api.get("/properties");
+
+      const availableProps = (res.data || []).filter(
         (p) => p.status === "available" && p.isAvailable !== false
       );
+
       setProperties(availableProps);
-    } catch (err) {
+    } catch {
       setError("Failed to load properties");
     }
   };
 
   const fetchTenants = async () => {
     try {
-      const response = await api.get("/auth/users");
-      const tenantUsers = (response.data.users || []).filter(
+      const res = await api.get("/auth/users");
+      const tenantUsers = (res.data.users || []).filter(
         (u) => u.role === "tenant"
       );
       setTenants(tenantUsers);
-    } catch (err) {
+    } catch {
       setError("Failed to load tenants");
     }
   };
 
+  const fetchLease = async () => {
+    try {
+      const res = await api.get(`/leases/${id}`);
+      const lease = res.data;
+
+      setFormData({
+        propertyId: lease.property._id || lease.property,
+        tenantId: lease.tenant._id || lease.tenant,
+        startDate: lease.startDate.split("T")[0],
+        endDate: lease.endDate.split("T")[0],
+        rentAmount: lease.rentAmount,
+        depositAmount: lease.depositAmount, // ✅ FIXED
+        paymentDueDay: lease.paymentDueDay,
+        terms: lease.terms,
+      });
+    } catch {
+      setError("Failed to fetch lease");
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  // ✅ AUTO-FILL RENT
+  useEffect(() => {
+    if (formData.propertyId) {
+      const selected = properties.find(
+        (p) => p._id === formData.propertyId
+      );
+      if (selected) {
+        setFormData((prev) => ({
+          ...prev,
+          rentAmount: selected.rentAmount || "",
+        }));
+      }
+    }
+  }, [formData.propertyId, properties]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
       if (isEditMode) {
@@ -99,230 +113,154 @@ const LeaseForm = () => {
       } else {
         await api.post("/leases", formData);
       }
+
       navigate("/leases");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "create"} lease`
-      );
+      setError(err.response?.data?.message || "Failed to save lease");
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedProperty = properties.find(
-    (p) => p._id === formData.propertyId
-  );
-
   if (initialLoading) return <Loader fullScreen />;
 
   return (
-    <div className="min-h-screen bg-black px-4 py-12 text-white">
+    <div className="min-h-screen bg-black text-white px-6 py-10">
       <div className="max-w-4xl mx-auto">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h1 className="text-4xl font-bold text-[#D4AF37] tracking-wide">
-              {isEditMode ? "Edit Lease" : "Create New Lease"}
-            </h1>
-            <p className="text-gray-400 mt-1">
-              {isEditMode
-                ? "Update the lease agreement details"
-                : "Fill in the details to create a new lease agreement"}
-            </p>
-          </div>
 
-          <button
-            className="px-5 py-2 bg-white/10 text-gray-300 border border-white/20 rounded-lg hover:bg-white/20 transition"
-            onClick={() => navigate("/leases")}
-          >
-            Cancel
-          </button>
+        {/* HEADER */}
+        <div className="flex justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-[#D4AF37]">
+              {isEditMode ? "Edit Lease" : "Create Lease"}
+            </h1>
+          </div>
+          <button onClick={() => navigate("/leases")}>Cancel</button>
         </div>
 
-        {error && (
-          <Alert type="error" message={error} onClose={() => setError("")} />
-        )}
+        {error && <Alert type="error" message={error} />}
 
-        {/* FORM */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* GRID */}
+          <div className="grid md:grid-cols-2 gap-6">
+
             {/* PROPERTY */}
-            <Field label="Property *">
-              <select
-                name="propertyId"
-                value={formData.propertyId}
-                onChange={handleChange}
-                required
-                className="lux-input"
-              >
-                <option value="">Select property</option>
-                {properties.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} — {p.address?.street}, {p.address?.city}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <select
+              name="propertyId"
+              value={formData.propertyId}
+              onChange={handleChange}
+              className="input"
+              required
+            >
+              <option value="">Select Property</option>
+              {properties.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
 
             {/* TENANT */}
-            <Field label="Tenant *">
-              <select
-                name="tenantId"
-                value={formData.tenantId}
-                onChange={handleChange}
-                required
-                className="lux-input"
-              >
-                <option value="">Select tenant</option>
-                {tenants.map((t) => (
-                  <option key={t._id} value={t._id}>
-                    {t.name} — {t.email}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <select
+              name="tenantId"
+              value={formData.tenantId}
+              onChange={handleChange}
+              className="input"
+              required
+            >
+              <option value="">Select Tenant</option>
+              {tenants.map((t) => (
+                <option key={t._id} value={t._id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
 
             {/* DATES */}
-            <Field label="Start Date *">
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                required
-                className="lux-input"
-              />
-            </Field>
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              className="input"
+              required
+            />
 
-            <Field label="End Date *">
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                required
-                className="lux-input"
-              />
-            </Field>
+            <input
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleChange}
+              className="input"
+              required
+            />
 
             {/* RENT */}
-            <Field label="Monthly Rent *">
-              <div className="relative">
-                <span className="lux-prefix">$</span>
-                <input
-                  type="number"
-                  name="rentAmount"
-                  value={formData.rentAmount}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  required
-                  className="lux-input pl-8"
-                />
-              </div>
-
-              {selectedProperty && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Property rent: {formatCurrency(selectedProperty.rent)}
-                </p>
-              )}
-            </Field>
+            <input
+              type="number"
+              name="rentAmount"
+              value={formData.rentAmount}
+              onChange={handleChange}
+              className="input"
+              placeholder="Rent"
+            />
 
             {/* DEPOSIT */}
-            <Field label="Security Deposit *">
-              <div className="relative">
-                <span className="lux-prefix">$</span>
-                <input
-                  type="number"
-                  name="securityDeposit"
-                  value={formData.securityDeposit}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  required
-                  className="lux-input pl-8"
-                />
-              </div>
-            </Field>
+            <input
+              type="number"
+              name="depositAmount"
+              value={formData.depositAmount}
+              onChange={handleChange}
+              className="input"
+              placeholder="Deposit"
+            />
 
             {/* DUE DAY */}
-            <Field label="Payment Due Day *">
-              <input
-                type="number"
-                name="paymentDueDay"
-                value={formData.paymentDueDay}
-                onChange={handleChange}
-                min="1"
-                max="31"
-                required
-                className="lux-input"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Must be between 1 and 31
-              </p>
-            </Field>
+            <input
+              type="number"
+              name="paymentDueDay"
+              value={formData.paymentDueDay}
+              onChange={handleChange}
+              className="input"
+              min="1"
+              max="31"
+            />
           </div>
 
           {/* TERMS */}
-          <div className="mb-10">
-            <Field label="Lease Terms & Conditions *">
-              <textarea
-                name="terms"
-                value={formData.terms}
-                onChange={handleChange}
-                rows="10"
-                required
-                placeholder="Enter the complete terms and conditions..."
-                className="lux-input resize-y"
-              />
-            </Field>
-          </div>
+          <textarea
+            name="terms"
+            value={formData.terms}
+            onChange={handleChange}
+            rows="5"
+            className="input w-full"
+            placeholder="Lease terms..."
+          />
 
-          {/* BUTTONS */}
-          <div className="flex justify-end gap-4 border-t border-white/10 pt-6">
-            <button
-              type="button"
-              onClick={() => navigate("/leases")}
-              className="px-6 py-2.5 bg-white/10 text-gray-300 border border-white/20 rounded-lg hover:bg-white/20 transition"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2.5 bg-[#D4AF37] text-black font-semibold rounded-lg hover:bg-[#c69d2f] transition disabled:opacity-50"
-            >
-              {loading
-                ? isEditMode
-                  ? "Updating..."
-                  : "Creating..."
-                : isEditMode
-                ? "Update Lease"
-                : "Create Lease"}
-            </button>
-          </div>
+          {/* BUTTON */}
+          <button
+            type="submit"
+            className="w-full bg-[#D4AF37] text-black py-3 rounded-lg"
+          >
+            {loading ? "Saving..." : "Create Lease"}
+          </button>
         </form>
-
-        {loading && <Loader fullScreen />}
       </div>
+
+      {/* ✅ SIMPLE UI STYLE */}
+      <style>{`
+        .input {
+          width: 100%;
+          padding: 12px;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.2);
+          color: white;
+          border-radius: 8px;
+        }
+      `}</style>
     </div>
   );
 };
-
-/* ---------------------- SUBCOMPONENTS ---------------------- */
-
-const Field = ({ label, children }) => (
-  <div>
-    <label className="block text-sm font-semibold text-[#D4AF37] mb-2">
-      {label}
-    </label>
-    {children}
-  </div>
-);
 
 export default LeaseForm;

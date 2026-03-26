@@ -61,7 +61,7 @@ const Login = () => {
           </p>
         </div>
 
-        {/* GLASS CARD */}
+        {/* CARD */}
         <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-xl shadow-2xl border border-white/10 space-y-6">
 
           {error && (
@@ -112,7 +112,7 @@ const Login = () => {
               </div>
             </div>
 
-            {/* SUBMIT */}
+            {/* BUTTON */}
             <button
               type="submit"
               disabled={loading}
@@ -123,39 +123,49 @@ const Login = () => {
             </button>
           </form>
 
-          {/* TEST USERS */}
+          {/* ✅ TEST ACCOUNTS */}
           <div className="pt-4 border-t border-white/10">
             <p className="text-xs text-gray-400 text-center mb-2">
               TEST ACCOUNTS
             </p>
 
+            {/* LANDLORD */}
             <button
-              onClick={() => handleTestLogin("landlord@test.com", "Test123!")}
+              onClick={() => handleTestLogin("ria@example.com", "123456")}
               className="w-full text-left bg-white/5 hover:bg-white/20 border border-white/10 
                          text-gray-200 px-4 py-3 rounded-lg mb-2 transition"
             >
               <div className="flex justify-between">
-                <span className="text-[#D4AF37] font-medium">Landlord</span>
+                <span className="text-[#D4AF37] font-medium">
+                  Ria (Landlord)
+                </span>
                 <span className="text-xs text-gray-300">Use →</span>
               </div>
-              <p className="text-xs text-gray-400">landlord@test.com</p>
+              <p className="text-xs text-gray-400">ria@example.com</p>
             </button>
 
+            {/* TENANT */}
             <button
-              onClick={() => handleTestLogin("tenant1@test.com", "Test123!")}
+              onClick={() =>
+                handleTestLogin("akshatpratap@gmail.com", "123456")
+              }
               className="w-full text-left bg-white/5 hover:bg-white/20 border border-white/10 
                          text-gray-200 px-4 py-3 rounded-lg transition"
             >
               <div className="flex justify-between">
-                <span className="text-[#D4AF37] font-medium">Tenant</span>
+                <span className="text-[#D4AF37] font-medium">
+                  Akshat (Tenant)
+                </span>
                 <span className="text-xs text-gray-300">Use →</span>
               </div>
-              <p className="text-xs text-gray-400">tenant1@test.com</p>
+              <p className="text-xs text-gray-400">
+                akshatpratap@gmail.com
+              </p>
             </button>
           </div>
         </div>
 
-        {/* Register */}
+        {/* REGISTER */}
         <p className="text-center text-gray-400 text-sm">
           Don’t have an account?{" "}
           <Link className="text-[#D4AF37] hover:text-[#e5c56a]" to="/register">
